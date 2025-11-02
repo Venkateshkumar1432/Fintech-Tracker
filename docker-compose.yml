@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  # ---------- FRONTEND ----------
+  frontend:
+    build: ./frontend
+    container_name: fintech_frontend
+    ports:
+      - "3000:80"
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - auth-service
+      - transaction-service
+    networks:
+      - fintech_network
+
+  # ---------- AUTH SERVICE ----------
+  auth-service:
+    build: ./service/auth-service
+    container_name: auth_service
+    ports:
+      - "4001:4001"
+    env_file:
+      - ./service/auth-service/.env
+    depends_on:
+      - postgres-db
+    networks:
+      - fintech_network
+
+  # ---------- TRANSACTION SERVICE ----------
+  transaction-service:
+    build: ./service/transaction-service
+    container_name: transaction_service
+    ports:
+      - "4003:4003"
+    env_file:
+      - ./service/transaction-service/.env
+    depends_on:
+      - postgres-db
+    networks:
+      - fintech_network
+
+  # ---------- POSTGRES DATABASE ----------
+  postgres-db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 3635
+      POSTGRES_DB: Fintech_Tracker_DataBase
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - fintech_network
+
+# ---------- NAMED VOLUMES ----------
+volumes:
+  postgres_data:
+
+# ---------- NETWORK ----------
+networks:
+  fintech_network:
+    driver: bridge

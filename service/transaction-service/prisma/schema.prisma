@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Transaction {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String   // "incoming" or "expense"
+  amount    Float
+  note      String?
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+   @@map("transaction")
+}
+
+model Balance {
+  id        Int   @default(autoincrement())
+  userId    String   @unique
+  netAmount Float    @default(0)
+  updatedAt DateTime @updatedAt
+
+    @@map("balance")
+}
