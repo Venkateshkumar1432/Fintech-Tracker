@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKERHUB_USER = 'venkatesh1432'
         AWS_REGION     = 'ap-south-1'
-        ASG_NAME       = 'fintech-app-asg'
+        ASG_NAME       = 'fintech-asg'
     }
 
     stages {
