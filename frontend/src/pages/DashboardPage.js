@@ -53,10 +53,10 @@ const DashboardPage = () => {
     setError("");
     try {
       const [txRes, balRes] = await Promise.all([
-        axios.get(`${TX_API}/api/transactions/`, {
+        axios.get(`${TX_API}/transactions/`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
-        axios.get(`${TX_API}/api/balance/`, {
+        axios.get(`${TX_API}/balance/`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
       ]);
@@ -151,7 +151,7 @@ const DashboardPage = () => {
     if (newTx.amount === "" || isNaN(Number(newTx.amount))) return alert("Enter a valid amount");
 
     try {
-      await axios.post(`${TX_API}/api/transactions/`, { ...newTx }, { headers: { Authorization: `Bearer ${accessToken}` } });
+      await axios.post(`${TX_API}/transactions/`, { ...newTx }, { headers: { Authorization: `Bearer ${accessToken}` } });
       setShowAddModal(false);
       setNewTx({ type: "incoming", amount: "", note: "" });
       fetchTransactions();
@@ -179,7 +179,7 @@ const DashboardPage = () => {
     if (editForm.amount === "" || isNaN(Number(editForm.amount))) return alert("Enter a valid amount");
 
     try {
-      await axios.put(`${TX_API}/api/transactions/${editingTx.id}`, editForm, { headers: { Authorization: `Bearer ${accessToken}` } });
+      await axios.put(`${TX_API}/transactions/${editingTx.id}`, editForm, { headers: { Authorization: `Bearer ${accessToken}` } });
       setShowEditModal(false);
       setEditingTx(null);
       fetchTransactions();
@@ -193,7 +193,7 @@ const DashboardPage = () => {
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this transaction?")) return;
     try {
-      await axios.delete(`${TX_API}/api/transactions/${id}`, {
+      await axios.delete(`${TX_API}/transactions/${id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       fetchTransactions();
@@ -205,7 +205,7 @@ const DashboardPage = () => {
 
   const handleExport = async () => {
   try {
-    const response = await axios.get(`${TX_API}/api/transactions/export`, {
+    const response = await axios.get(`${TX_API}/transactions/export`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       responseType: "blob", // <-- important for downloading files
     });

@@ -16,7 +16,7 @@ function VerifyOtp() {
     e.preventDefault();
 
     try {
-      await axios.post(`${AUTH_API}/api/auth/verify-otp`, { email, otp });
+      await axios.post(`${AUTH_API}/auth/verify-otp`, { email, otp });
 
       alert("Verification successful! Please login.");
       localStorage.removeItem("verifyEmail");

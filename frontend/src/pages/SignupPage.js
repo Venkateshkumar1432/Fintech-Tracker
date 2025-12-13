@@ -40,7 +40,7 @@ const SignupPage = () => {
       Object.keys(form).forEach((key) => formData.append(key, form[key]));
       if (avatarFile) formData.append("avatarUrl", avatarFile);
 
-      const res = await axios.post(`${AUTH_API}/api/auth/register`, formData, {
+      const res = await axios.post(`${AUTH_API}/auth/register`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

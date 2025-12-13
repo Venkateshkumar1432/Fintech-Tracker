@@ -33,7 +33,7 @@ const ExpensePage = () => {
     if (!accessToken) return;
     setLoading(true);
     try {
-      const res = await axios.get(`${TX_API}/api/transactions/type/${Type}`, {
+      const res = await axios.get(`${TX_API}/transactions/type/${Type}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
@@ -97,7 +97,7 @@ useEffect(() => {
     e.preventDefault();
     if (!accessToken) return;
     try {
-      await axios.post(`${TX_API}/api/transactions/`, newTx, {
+      await axios.post(`${TX_API}/transactions/`, newTx, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       setShowAddModal(false);

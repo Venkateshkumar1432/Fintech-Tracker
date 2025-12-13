@@ -23,7 +23,7 @@ const ProfilePage = () => {
     if (!accessToken || !user?.email) return;
     setLoading(true);
     try {
-      const res = await axios.get(`${AUTH_API}/api/auth/${user.email}`, {
+      const res = await axios.get(`${AUTH_API}/auth/${user.email}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       setProfile(res.data);
@@ -44,7 +44,7 @@ const ProfilePage = () => {
     }
 
     try {
-      await axios.delete(`${AUTH_API}/api/auth/delete/${user.id}`, {
+      await axios.delete(`${AUTH_API}/auth/delete/${user.id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
@@ -63,10 +63,10 @@ const ProfilePage = () => {
     if (!accessToken) return;
     try {
       const [incomeRes, expenseRes] = await Promise.all([
-        axios.get(`${TX_API}/api/transactions/type/incoming`, {
+        axios.get(`${TX_API}/transactions/type/incoming`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
-        axios.get(`${TX_API}/api/transactions/type/expense`, {
+        axios.get(`${TX_API}/transactions/type/expense`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         }),
       ]);

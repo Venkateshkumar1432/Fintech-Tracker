@@ -11,7 +11,7 @@ export const AuthProvider = ({ children }) => {
 
   // login with auth-service
   const login = async (email, password) => {
-    const res = await axios.post(`${AUTH_API}/api/auth/login`, {
+    const res = await axios.post(`${AUTH_API}/auth/login`, {
       email,
       password,
     });
@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }) => {
     const refreshToken = localStorage.getItem("refreshToken");
     if (!refreshToken) return;
     try {
-      const res = await axios.post(`${AUTH_API}/api/auth/refresh`, {
+      const res = await axios.post(`${AUTH_API}/auth/refresh`, {
         refreshToken,
       });
       setAccessToken(res.data.accessToken);

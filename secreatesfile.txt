@@ -1,0 +1,62 @@
+#!/bin/bash
+set -xe
+
+REGION="ap-south-1"
+REPO_DIR="/opt/fintech"
+REPO_URL="https://github.com/Venkateshkumar1432/Fintech-Tracker.git"
+DOCKERHUB_USER="venkatesh1432"
+
+# ---------- Install dependencies ----------
+apt-get update -y
+apt-get install -y docker.io git curl awscli
+
+# ---------- Docker Compose ----------
+curl -L "https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+
+systemctl enable docker
+systemctl start docker
+
+# ---------- Clone repo ----------
+mkdir -p ${REPO_DIR}
+cd ${REPO_DIR}
+
+if [ -d .git ]; then
+  git fetch --all
+  git reset --hard origin/main
+else
+  git clone ${REPO_URL} .
+fi
+
+# ---------- AUTH SERVICE ENV ----------
+cat > ./service/auth-service/.env <<EOF
+PORT=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/auth-service/PORT" --query "Parameter.Value" --output text --region ${REGION})
+DATABASE_URL=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/auth-service/DATABASE_URL" --with-decryption --query "Parameter.Value" --output text --region ${REGION})
+JWT_SECRET=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/auth-service/JWT_SECRET" --with-decryption --query "Parameter.Value" --output text --region ${REGION})
+JWT_REFRESH_SECRET=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/auth-service/JWT_REFRESH_SECRET" --with-decryption --query "Parameter.Value" --output text --region ${REGION})
+OTP_TTL_MINUTES=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/auth-service/OTP_TTL_MINUTES" --query "Parameter.Value" --output text --region ${REGION})
+SMTP_HOST=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/auth-service/SMTP_HOST" --query "Parameter.Value" --output text --region ${REGION})
+SMTP_PORT=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/auth-service/SMTP_PORT" --query "Parameter.Value" --output text --region ${REGION})
+SMTP_SECURE=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/auth-service/SMTP_SECURE" --query "Parameter.Value" --output text --region ${REGION})
+SMTP_USER=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/auth-service/SMTP_USER" --with-decryption --query "Parameter.Value" --output text --region ${REGION})
+SMTP_PASS=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/auth-service/SMTP_PASS" --with-decryption --query "Parameter.Value" --output text --region ${REGION})
+NODE_ENV=production
+EOF
+
+# ---------- FRONTEND ENV ----------
+cat > ./frontend/.env <<EOF
+REACT_APP_AUTH_API=$(aws ssm get-parameter --name "/FINTECH-TRACKER/frontend/REACT_APP_AUTH_API" --query "Parameter.Value" --output text --region ${REGION})
+REACT_APP_TRANSACTION_API=$(aws ssm get-parameter --name "/FINTECH-TRACKER/frontend/REACT_APP_TRANSACTION_API" --query "Parameter.Value" --output text --region ${REGION})
+EOF
+
+# ---------- TRANSACTION SERVICE ENV ----------
+cat > ./service/transaction-service/.env <<EOF
+PORT=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/transaction-service/PORT" --query "Parameter.Value" --output text --region ${REGION})
+DATABASE_URL=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/transaction-service/DATABASE_URL" --with-decryption --query "Parameter.Value" --output text --region ${REGION})
+JWT_SECRET=$(aws ssm get-parameter --name "/FINTECH-TRACKER/service/transaction-service/JWT_SECRET" --with-decryption --query "Parameter.Value" --output text --region ${REGION})
+NODE_ENV=production
+EOF
+
+# ---------- Run containers ----------
+docker-compose -f docker-compose.prod.yml pull
+docker-compose -f docker-compose.prod.yml up -d

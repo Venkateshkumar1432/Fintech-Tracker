@@ -1,20 +1,24 @@
-# Auth-Service/Dockerfile
+# ============================
+# Transaction Service - Production Dockerfile (JavaScript)
+# ============================
 FROM node:18-bullseye
 
 WORKDIR /app
 
-# Copy dependency files
+# Copy dependency files first (cache npm install)
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy all files
+# Copy source code
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma client (required)
 RUN npx prisma generate
 
+# Expose service port
 EXPOSE 4003
 
-CMD ["npm", "start"]
+# On container start: run migrations then start the app
+CMD ["sh", "-c", "npx prisma migrate deploy && node src/index.js"]

@@ -1,0 +1,118 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKERHUB_USER = 'venkatesh1432'
+        AWS_REGION     = 'ap-south-1'
+        ASG_NAME       = 'fintech-app-asg'
+    }
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Detect Changed Services') {
+            steps {
+                script {
+                    env.FRONTEND_CHANGED = 'false'
+                    env.AUTH_CHANGED     = 'false'
+                    env.TX_CHANGED       = 'false'
+
+                    if (!env.GIT_PREVIOUS_SUCCESSFUL_COMMIT) {
+                        echo "First build → build ALL services"
+                        env.FRONTEND_CHANGED = 'true'
+                        env.AUTH_CHANGED     = 'true'
+                        env.TX_CHANGED       = 'true'
+                    } else {
+                        def changed = sh(
+                            script: "git diff --name-only ${env.GIT_PREVIOUS_SUCCESSFUL_COMMIT} ${env.GIT_COMMIT} || true",
+                            returnStdout: true
+                        ).trim()
+
+                        echo "Changed files:\n${changed}"
+
+                        changed.split("\\r?\\n").each { file ->
+                            if (file.startsWith('frontend/'))                     env.FRONTEND_CHANGED = 'true'
+                            if (file.startsWith('service/auth-service/'))        env.AUTH_CHANGED     = 'true'
+                            if (file.startsWith('service/transaction-service/')) env.TX_CHANGED       = 'true'
+                        }
+                    }
+
+                    echo "FRONTEND_CHANGED = ${env.FRONTEND_CHANGED}"
+                    echo "AUTH_CHANGED     = ${env.AUTH_CHANGED}"
+                    echo "TX_CHANGED       = ${env.TX_CHANGED}"
+                }
+            }
+        }
+
+        stage('Build & Push FRONTEND') {
+            when { expression { env.FRONTEND_CHANGED == 'true' } }
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
+                        def img = docker.build(
+                            "${DOCKERHUB_USER}/fintech-frontend:${env.GIT_COMMIT}",
+                            "./frontend"
+                        )
+                        img.push()
+                        img.push('latest')
+                    }
+                }
+            }
+        }
+
+        stage('Build & Push AUTH SERVICE') {
+            when { expression { env.AUTH_CHANGED == 'true' } }
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
+                        def img = docker.build(
+                            "${DOCKERHUB_USER}/fintech-auth-service:${env.GIT_COMMIT}",
+                            "./service/auth-service"
+                        )
+                        img.push()
+                        img.push('latest')
+                    }
+                }
+            }
+        }
+
+        stage('Build & Push TRANSACTION SERVICE') {
+            when { expression { env.TX_CHANGED == 'true' } }
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-creds') {
+                        def img = docker.build(
+                            "${DOCKERHUB_USER}/fintech-transaction-service:${env.GIT_COMMIT}",
+                            "./service/transaction-service"
+                        )
+                        img.push()
+                        img.push('latest')
+                    }
+                }
+            }
+        }
+
+        stage('Deploy (ASG Instance Refresh)') {
+            when {
+                expression {
+                    env.FRONTEND_CHANGED == 'true' ||
+                    env.AUTH_CHANGED     == 'true' ||
+                    env.TX_CHANGED       == 'true'
+                }
+            }
+            steps {
+                sh """
+                  aws configure set default.region ${AWS_REGION}
+                  aws autoscaling start-instance-refresh \
+                    --auto-scaling-group-name ${ASG_NAME} \
+                    --preferences MinHealthyPercentage=50,InstanceWarmup=300
+                """
+            }
+        }
+    }
+}
