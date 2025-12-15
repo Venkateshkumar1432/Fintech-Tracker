@@ -3,7 +3,7 @@ pipeline {
 
   environment {
     DOCKERHUB_USER = 'venkatesh1432'
-    APP_SERVERS = 'ubuntu@43.205.145.187 ubuntu@13.235.100.61 ubuntu@13.233.227.173'
+    APP_SERVERS = 'ubuntu@13.233.24.245 ubuntu@43.204.130.140 ubuntu@13.235.70.195'
   }
 
   stages {
