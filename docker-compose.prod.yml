@@ -17,7 +17,7 @@ services:
 
   frontend:
     image: venkatesh1432/fintech-frontend:latest
-    container_neame: fintech_frontend
+    container_name: fintech_frontend
     expose: 
       - "3000"
     env_file:
