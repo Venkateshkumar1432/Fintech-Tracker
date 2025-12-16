@@ -50,7 +50,7 @@ const LoginPage = () => {
               <li>• Export transactions</li>
               <li>• Manage profile & security</li>
             </ul>
-            <div style={{ fontSize: 12, opacity: 0.9, marginTop: 12 }}>Need help? contact@fintrack.app</div>
+            <div style={{ fontSize: 12, opacity: 0.9, marginTop: 12 }}>Need help? venkateshnagond1432@gmail.com</div>
           </div>
 
           <div className="col-12 col-md-7 p-4 bg-white">
@@ -104,7 +104,7 @@ const LoginPage = () => {
                   <input className="form-check-input" type="checkbox" name="remember" id="remember" checked={form.remember} onChange={handleChange} />
                   <label className="form-check-label" htmlFor="remember">Remember me</label>
                 </div>
-                <Link to="/forgot" className="text-decoration-none">Forgot?</Link>
+                
               </div>
 
               <button type="submit" className="btn btn-primary w-100 d-flex justify-content-center align-items-center" disabled={loading} style={{ padding: "10px 14px", borderRadius: 10 }}>
