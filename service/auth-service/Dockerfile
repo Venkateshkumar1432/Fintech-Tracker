@@ -24,4 +24,4 @@ EXPOSE 4001
 #   START COMMAND (IMPORTANT)
 # ============================
 # Run migrations, then start server
-CMD ["sh", "-c", "npx prisma migrate deploy && node src/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db push && node src/index.js"]

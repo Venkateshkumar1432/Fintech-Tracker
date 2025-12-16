@@ -21,4 +21,4 @@ RUN npx prisma generate
 EXPOSE 4003
 
 # On container start: run migrations then start the app
-CMD ["sh", "-c", "npx prisma migrate deploy && node src/index.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && npx prisma db push && node src/index.js"]
