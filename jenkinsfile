@@ -55,8 +55,9 @@ pipeline {
 
               sh """
               ssh -o StrictHostKeyChecking=no ${server} '
-                git fetch origin &&
-                git reset --hard origin/main &&
+                cd /opt/fintech &&
+                git fetch origin
+                git reset --hard origin/main
                 docker-compose -f docker-compose.prod.yml pull &&
                 docker-compose -f docker-compose.prod.yml up -d
               '
