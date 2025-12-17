@@ -14,7 +14,9 @@ app.use("/api/auth", authRoutes);
 
 // Serve uploaded files (avatars)
 app.use("/api/uploads", express.static("uploads"));
-
+app.get("/",(req,res) => {
+  res.send("Hello World!");
+})
 
 // quick test route to list users (DEV ONLY)
 app.get("/api/test-db", async (req, res) => {
