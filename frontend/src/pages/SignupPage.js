@@ -40,9 +40,20 @@ const SignupPage = () => {
       Object.keys(form).forEach((key) => formData.append(key, form[key]));
       if (avatarFile) formData.append("avatarUrl", avatarFile);
 
-      const res = await axios.post(`${AUTH_API}/auth/register`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axios.post(`${AUTH_API}/auth/register`,
+      {    
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        phone: form.phone,
+        preferences: form.preferences,
+      }, 
+        {
+        headers: {
+        "Content-Type": "application/json",
+    },
+      }
+    );
 
       // navigate to OTP verification with email
       navigate("/verify-otp", { state: { email: form.email } });
