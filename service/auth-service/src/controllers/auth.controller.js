@@ -54,6 +54,7 @@ if (existing) {
 
     // await sendOtpEmail(email, otpCode);
     // SEND EMAIL ASYNC (fire & forget)
+    console.log("DEBUG OTP:", otpCode);
    sendOtpEmail(email, otpCode)
   .then(() => console.log("OTP email sent"))
   .catch(err => console.error("OTP email failed:", err));
