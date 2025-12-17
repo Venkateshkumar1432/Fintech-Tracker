@@ -52,7 +52,11 @@ if (existing) {
 }
 
 
-    await sendOtpEmail(email, otpCode);
+    // await sendOtpEmail(email, otpCode);
+    // SEND EMAIL ASYNC (fire & forget)
+   sendOtpEmail(email, otpCode)
+  .then(() => console.log("OTP email sent"))
+  .catch(err => console.error("OTP email failed:", err));
 
     return res.status(201).json({ message: "Registered (or updated). OTP sent to email." });
   } catch (err) {
