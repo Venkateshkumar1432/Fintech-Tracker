@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-service
+  namespace: fintech
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: transaction-service
+  template:
+    metadata:
+      labels:
+        app: transaction-service
+    spec:
+      containers:
+      - name: transaction-service
+        image: asia-south1-docker.pkg.dev/fintech-prod/fintech-repo/transaction-service:latest
+        ports:
+        - containerPort: 4003
+        envFrom:
+        - configMapRef:
+            name: fintech-transaction-config
+        - secretRef:
+            name: fintech-transaction-secret
