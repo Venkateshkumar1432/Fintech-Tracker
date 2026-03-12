@@ -17,7 +17,7 @@ COPY . .
 # Generate Prisma client (required)o
 RUN npx prisma generate
 
-# Expose service port
+# Expose service ports
 EXPOSE 4003
 
 # On container start: run migrations then start the app
