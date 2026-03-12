@@ -40,7 +40,7 @@ sudo mv kubectl /usr/local/bin/
 kubectl version --client
 
 echo "Installing Google Cloud SDK..."
-
+    
 curl https://sdk.cloud.google.com | bash
 
 exec -l $SHELL

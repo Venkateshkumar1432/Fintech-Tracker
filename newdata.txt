@@ -61,3 +61,15 @@ EOF
 # ---------- Run containers ----------
 docker-compose -f docker-compose.prod.yml pull
 docker-compose -f docker-compose.prod.yml up -d
+
+
+#----------Cluster creation------------
+gcloud container clusters create fintech-kubernetes-cluster \
+  --zone asia-south1-a \
+  --machine-type e2-standard-2 \
+  --num-nodes 1 \
+  --enable-autoscaling \
+  --min-nodes 1 \
+  --max-nodes 3 \
+  --enable-autorepair \
+  --enable-autoupgrade

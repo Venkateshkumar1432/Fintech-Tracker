@@ -10,6 +10,8 @@ gcloud container clusters create $CLUSTER_NAME \
   --region $REGION \
   --num-nodes 3 \
   --machine-type e2-standard-2 \
+  --min-nodes 1 \
+  --max-nodes 3 \
   --enable-autorepair \
   --enable-autoupgrade
 

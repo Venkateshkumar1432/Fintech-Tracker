@@ -1,0 +1,164 @@
+pipeline {
+  agent any
+
+  environment {
+    PROJECT_ID = "gen-lang-client-0520338057"
+    REGION = "asia-south1"
+    REPO = "fintech-repo"
+    CLUSTER = "fintech-kubernetes-cluster"
+    ZONE = "asia-south1-a"
+    NAMESPACE = "fintech"
+  }
+
+  stages {
+
+    stage('Checkout Code') {
+            steps {
+                echo "📥 Cloning repository..."
+                checkout scm
+            }
+    }
+
+    stage('Detect Changed Services') {
+      steps {
+        script {
+          def changedFiles = sh(
+            script: "git diff --name-only HEAD~1 HEAD",
+            returnStdout: true
+          ).trim()
+
+          echo "Changed files: ${changedFiles}"
+
+          env.FRONTEND_CHANGED = changedFiles.contains("frontend/") ? "true" : "false"
+          env.AUTH_CHANGED = changedFiles.contains("service/auth-service/") ? "true" : "false"
+          env.TRANS_CHANGED = changedFiles.contains("service/transaction-service/") ? "true" : "false"
+        }
+      }
+    }
+
+    stage('Authenticate GCP') {
+      steps {
+        withCredentials([file(credentialsId: 'gcp-service-key', variable: 'GCP_KEY')]) {
+          sh '''
+            gcloud auth activate-service-account --key-file=$GCP_KEY
+            gcloud config set project $PROJECT_ID
+            gcloud auth configure-docker $REGION-docker.pkg.dev -q
+          '''
+        }
+      }
+    }
+
+    stage('Build & Push Images') {
+      parallel {
+        stage('Frontend Build') {
+          when { expression { env.FRONTEND_CHANGED == "true" } }
+          steps {
+            sh '''
+              docker build \
+                -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/frontend:$BUILD_NUMBER \
+                ./frontend
+              docker push \
+                $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/frontend:$BUILD_NUMBER
+            '''
+          }
+        }
+
+        stage('Auth Service Build') {
+          when { expression { env.AUTH_CHANGED == "true" } }
+          steps {
+            sh '''
+              docker build \
+                -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/auth-service:$BUILD_NUMBER \
+                ./service/auth-service
+              docker push \
+                $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/auth-service:$BUILD_NUMBER
+            '''
+          }
+        }
+
+        stage('Transaction Service Build') {
+          when { expression { env.TRANS_CHANGED == "true" } }
+          steps {
+            sh '''
+              docker build \
+                -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/transaction-service:$BUILD_NUMBER \
+                ./service/transaction-service
+              docker push \
+                $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/transaction-service:$BUILD_NUMBER
+            '''
+          }
+        }
+      }
+    }
+
+    stage('Connect to GKE') {
+      steps {
+        sh '''
+          gcloud container clusters get-credentials $CLUSTER \
+            --zone $ZONE
+        '''
+      }
+    }
+
+    stage('Deploy Updated Services') {
+      steps {
+        script {
+          if (env.FRONTEND_CHANGED == "true") {
+            sh """
+              kubectl set image deployment/frontend \
+                frontend=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/frontend:$BUILD_NUMBER \
+                -n $NAMESPACE
+            """
+          }
+
+          if (env.AUTH_CHANGED == "true") {
+            sh """
+              kubectl set image deployment/auth-service \
+                auth-service=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/auth-service:$BUILD_NUMBER \
+                -n $NAMESPACE
+            """
+          }
+
+          if (env.TRANS_CHANGED == "true") {
+            sh """
+              kubectl set image deployment/transaction-service \
+                transaction-service=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/transaction-service:$BUILD_NUMBER \
+                -n $NAMESPACE
+            """
+          }
+        }
+      }
+    }
+
+    stage('Verify Deployment') {
+      steps {
+        script {
+          if (env.FRONTEND_CHANGED == "true") {
+            sh "kubectl rollout status deployment/frontend -n $NAMESPACE"
+          }
+
+          if (env.AUTH_CHANGED == "true") {
+            sh "kubectl rollout status deployment/auth-service -n $NAMESPACE"
+          }
+
+          if (env.TRANS_CHANGED == "true") {
+            sh "kubectl rollout status deployment/transaction-service -n $NAMESPACE"
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    failure {
+      script {
+        echo "Deployment failed — initiating rollback"
+        sh '''
+          kubectl rollout undo deployment/frontend -n fintech || true
+          kubectl rollout undo deployment/auth-service -n fintech || true
+          kubectl rollout undo deployment/transaction-service -n fintech || true
+        '''
+      }
+    }
+  }
+}
