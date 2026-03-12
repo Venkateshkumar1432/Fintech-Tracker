@@ -21,19 +21,16 @@ pipeline {
             'https://index.docker.io/v1/',
             'dockerhub-creds'
           ) {
-
             echo "Building & pushing frontend image"
             docker.build(
               "${DOCKERHUB_USER}/fintech-frontend:latest",
               "frontend"
             ).push()
-
             echo "Building & pushing auth-service image"
             docker.build(
               "${DOCKERHUB_USER}/fintech-auth-service:latest",
               "service/auth-service"
             ).push()
-
             echo "Building & pushing transaction-service image"
             docker.build(
               "${DOCKERHUB_USER}/fintech-transaction-service:latest",

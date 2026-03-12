@@ -14,7 +14,7 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Generate Prisma client
+# Generate Prisma clientt
 RUN npx prisma generate
 
 # Expose service port
