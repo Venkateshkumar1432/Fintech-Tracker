@@ -235,7 +235,7 @@ const DashboardPage = () => {
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap">
         <h2 className="mb-2">
           👋 Hi <span className="text-success">{user?.name || "User"}</span>, Welcome to{" "}
-          <strong>Daily Expense Tracker Dashboard</strong>
+          <strong>Expense Tracker</strong>
         </h2>
         <Button
             variant="outline-primary"
