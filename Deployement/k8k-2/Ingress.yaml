@@ -5,7 +5,9 @@ metadata:
   namespace: fintech
   annotations:
     kubernetes.io/ingress.class: "gce"
+    ingress.kubernetes.io/healthcheck-path: /
 spec:
+  ingressClassName: gce
   rules:
   - host: fintech.venkateshkumar.cloud
     http:
@@ -25,14 +27,14 @@ spec:
             name: auth-service
             port:
               number: 3002
-          
+
       - path: /api/transactions
         pathType: Prefix
         backend:
           service:
             name: transaction-service
             port:
-              number: 3003              
+              number: 3003
 
       - path: /api/balance
         pathType: Prefix

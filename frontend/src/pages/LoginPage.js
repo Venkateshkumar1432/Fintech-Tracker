@@ -55,7 +55,7 @@ const LoginPage = () => {
 
           <div className="col-12 col-md-7 p-4 bg-white">
             <div className="mb-3 text-center">
-              <h3 className="fw-bold">Welcome back</h3>
+              <h3 className="fw-bold">Welcome back to finTech</h3>
               <p className="text-muted mb-0">Sign in to your account to continue</p>
             </div>
 

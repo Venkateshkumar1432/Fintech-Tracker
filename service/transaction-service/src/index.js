@@ -15,6 +15,9 @@ app.get("/api/transaction/health", (req, res) => res.send("Simple Transaction Se
 
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/balance", balanceRoutes);
+app.get("/",(req,res) => {
+  res.send("Hello World!");
+})
 
 const PORT = process.env.PORT || 4003;
 app.listen(PORT, () => console.log(`🚀 Transaction Service running on port ${PORT}`));

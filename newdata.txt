@@ -73,3 +73,43 @@ gcloud container clusters create fintech-kubernetes-cluster \
   --max-nodes 3 \
   --enable-autorepair \
   --enable-autoupgrade
+
+
+#------------- intallation----------
+✅ Step 1 — Add Google Cloud SDK Repository
+
+Run these commands on your Jenkins VM:
+
+sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
+
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | \
+  sudo gpg --dearmor -o /usr/share/keyrings/google-cloud.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/google-cloud.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | \
+  sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+✅ Step 2 — Update Package List
+sudo apt-get update
+
+Now your system will know about Google Cloud packages.
+
+✅ Step 3 — Install the GKE Plugin
+sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+✅ Step 4 — Verify Installation
+
+Run:
+
+gke-gcloud-auth-plugin --version
+
+You should see something like:
+
+Kubernetes Auth Plugin version: X.X.X
+✅ Step 5 — Enable the Plugin
+
+Run:
+
+export USE_GKE_GCLOUD_AUTH_PLUGIN=True
+
+Make it permanent:
+
+echo 'export USE_GKE_GCLOUD_AUTH_PLUGIN=True' >> ~/.bashrc
+source ~/.bashrc
